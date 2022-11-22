@@ -10,7 +10,7 @@ ENTITY central IS
 
         sensor : in std_logic;
         intr : in std_logic;
-        senha : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+        senha : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
 
         led : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
         s_buzzer : out std_logic
@@ -36,43 +36,49 @@ BEGIN
             buzzer <= '0';
             FSM <= DESARMADO;
         ELSIF rising_edge(clock) THEN
-            if intr = '1' then
                 CASE FSM IS
                     WHEN DESARMADO =>
                         buzzer <= '0';
                         cnt <= "0010";
                         cntr <= cntr + '1';
-                        if senha = x"3" THEN
-                            FSM <= ARMADO;
-                        else
-                            buzzer <= '1';
-                            if cntr = x"17D7840" THEN
-                                FSM <= DESARMADO;
+                        if intr = '1' then
+                            if senha = "11" THEN
+                                FSM <= ARMADO;
+                            elsif senha = "01" then
+                                buzzer <= '1';
+                                if cntr = x"17D7840" THEN
+                                    FSM <= DESARMADO;
+                                END IF;
                             END IF;
-                        END IF;    
+                        end if;        
                     WHEN ARMADO =>     
                         cnt <= "0001";
                         buzzer <= '0';
                         cntr <= cntr + '1';
                         if sensor <= '1' THEN
-                            FSM <= DISPARANDO;
-                        END IF;
-                        if senha = x"30" THEN
-                            FSM <= DESARMADO;
-                        else
-                            buzzer <= '1';
-                            if cntr = x"17D7840" THEN
-                                FSM <= ARMADO;
-                            end if;    
-                        END IF;
+                             FSM <= DISPARANDO;
+                        end if;
+                        if intr = '1' then
+                            if senha = "11" THEN
+                                FSM <= DESARMADO;
+                            elsif senha = "01" then
+                                buzzer <= '1';
+                                if cntr = x"17D7840" THEN
+                                    FSM <= ARMADO;
+                                end if;    
+                            END IF;
+                        end if;       
                     WHEN DISPARANDO => 
                         buzzer <= '1';
                         cnt <= "1111";
-                        if senha = x"30" THEN
-                            FSM <= DESARMADO;
-                        END IF; 
+                        if intr = '1' then
+                            if senha = "11" THEN
+                                FSM <= DESARMADO;
+                            elsif senha = "01" then
+                                FSM <= DISPARANDO;    
+                            END IF;
+                        end if;     
                 END CASE;
-            end if;
         END IF;
     END PROCESS;
 

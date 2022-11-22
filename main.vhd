@@ -27,6 +27,8 @@ ARCHITECTURE main OF main IS
     SIGNAL cnt : STD_LOGIC_VECTOR(3 DOWNTO 0);
     SIGNAL cntr : STD_LOGIC_VECTOR(3 DOWNTO 0);
     SIGNAL led : STD_LOGIC_VECTOR(3 DOWNTO 0);
+
+    SIGNAL senha_s : std_logic_vector(1 downto 0);
         
     SIGNAL ir_sync : std_logic;    
     SIGNAL reset : std_logic;
@@ -100,8 +102,18 @@ BEGIN
             reset => reset,
             sensor => btn1_deb,
             led => led,
-            senha => command,
+            senha => senha_s,
             s_buzzer => buzzer,
             intr => intr
         );
+
+    senhas : ENTITY work.senha
+        PORT MAP(
+            clock => clock,
+            reset => reset,
+            ir => command,
+            senha_c => senha_s,
+            intr => intr
+        );
+
     END main;
