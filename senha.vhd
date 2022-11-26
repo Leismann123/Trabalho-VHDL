@@ -6,77 +6,172 @@ USE ieee.std_logic_arith.ALL;
 ENTITY senha IS
     PORT (
         clock : IN STD_LOGIC;
-        reset : IN STD_LOGIC;
+        reset_n : IN STD_LOGIC;
 
-        ir : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
-        intr : in std_logic;
+        intr : IN STD_LOGIC;
 
-        senha_c : out std_logic_vector(1 downto 0)
+        senha_ok : OUT STD_LOGIC;
+        senha_fail : OUT STD_LOGIC;
+
+        cnt_in : IN STD_LOGIC_VECTOR(3 DOWNTO 0)
+
     );
-END senha;
+END ENTITY;
 
-ARCHITECTURE senha OF senha IS
-    TYPE stateFSM IS (esperando, senha1, senha2, senha3, liberado);
-    SIGNAL FSM : stateFSM;
+ARCHITECTURE rtl OF senha IS
 
-    SIGNAL senha_1 : std_logic_vector(7 downto 0);
-    SIGNAL senha_2 : std_logic_vector(7 downto 0);
-    SIGNAL senha_3 : std_logic_vector(7 downto 0);
-    SIGNAL senha_4 : std_logic_vector(7 downto 0);
+    --Senha
+    SIGNAL senha_0 : STD_LOGIC_VECTOR(3 DOWNTO 0);
+    SIGNAL senha_1 : STD_LOGIC_VECTOR(3 DOWNTO 0);
+    SIGNAL senha_2 : STD_LOGIC_VECTOR(3 DOWNTO 0);
+    SIGNAL senha_3 : STD_LOGIC_VECTOR(3 DOWNTO 0);
 
+    SIGNAL en_i : STD_LOGIC_VECTOR(3 DOWNTO 0);
+
+    SIGNAL reset : STD_LOGIC;
 
 BEGIN
-    PROCESS (clock, reset)
-    BEGIN
-        IF reset = '1' THEN
-            senha_1 <= x"18";
-            senha_2 <= x"7A";
-            senha_3 <= x"42";
-            senha_4 <= x"38";
 
-        ELSIF rising_edge(clock) THEN
-                CASE FSM IS
-                    WHEN esperando =>
-                         if intr = '1' then
-                            if ir = senha_1 THEN
-                                FSM <= senha1;
-                            else
-                                senha_c <= "01";
-                                FSM <= esperando;
-                            END IF;
-                        END IF;       
-                    WHEN senha1 =>     
-                        if intr = '1' then
-                            if ir = senha_2 THEN
-                                FSM <= senha2;
-                            else
-                                senha_c <= "01";
-                                FSM <= esperando;
-                            END IF;
-                        END IF;    
-                    WHEN senha2 =>     
-                        if intr = '1' then
-                            if ir = senha_3 THEN
-                                FSM <= senha3;
-                            else
-                                senha_c <= "01";
-                                FSM <= esperando;
-                            END IF;
-                        END IF;    
-                    WHEN senha3 =>     
-                        if intr = '1' then
-                            if ir = senha_4 THEN
-                                FSM <= liberado;
-                            else
-                                senha_c <= "01";
-                                FSM <= esperando;
-                            END IF;
-                        END IF;    
-                    WHEN liberado =>     
-                        senha_c <= "11";
-                        FSM <= esperando;
-                END CASE;
+    reset <= NOT reset_n;
+
+    PROCESS (senha_3, senha_2, senha_1)
+    BEGIN
+        IF (senha_3 /= (senha_3'RANGE => '0')) THEN
+            en_i <= "1111";
+        ELSIF (senha_2 /= (senha_2'RANGE => '0')) THEN
+            en_i <= "0111";
+        ELSIF (senha_1 /= (senha_1'RANGE => '0')) THEN
+            en_i <= "0011";
+        ELSE
+            en_i <= "0001";
+        END IF;
+    END PROCESS;
+    PROCESS (cnt_in)
+    BEGIN
+        IF intr = '1' THEN
+            CASE cnt_in IS
+                WHEN "0000" => --0
+                    IF senha_0 /= (senha_0'RANGE => '0') THEN
+                        senha_0 <= "0000";
+                    ELSIF senha_1 /= (senha_1'RANGE => '0') THEN
+                        senha_1 <= "0000";
+                    ELSIF senha_2 /= (senha_2'RANGE => '0') THEN
+                        senha_2 <= "0000";
+                    ELSIF senha_3 /= (senha_3'RANGE => '0') THEN
+                        senha_3 <= "0000";
+                    END IF;
+
+                WHEN "0001" => --1
+                    IF senha_0 /= (senha_0'RANGE => '0') THEN
+                        senha_0 <= "0001";
+                    ELSIF senha_1 /= (senha_1'RANGE => '0') THEN
+                        senha_1 <= "0001";
+                    ELSIF senha_2 /= (senha_2'RANGE => '0') THEN
+                        senha_2 <= "0001";
+                    ELSIF senha_3 /= (senha_3'RANGE => '0') THEN
+                        senha_3 <= "0001";
+                    END IF;
+
+                WHEN "0010" => --2
+                    IF senha_0 /= (senha_0'RANGE => '0') THEN
+                        senha_0 <= "0010";
+                    ELSIF senha_1 /= (senha_1'RANGE => '0') THEN
+                        senha_1 <= "0010";
+                    ELSIF senha_2 /= (senha_2'RANGE => '0') THEN
+                        senha_2 <= "0010";
+                    ELSIF senha_3 /= (senha_3'RANGE => '0') THEN
+                        senha_3 <= "0010";
+                    END IF;
+
+                WHEN "0011" => --3
+                    IF senha_0 /= (senha_0'RANGE => '0') THEN
+                        senha_0 <= "0011";
+                    ELSIF senha_1 /= (senha_1'RANGE => '0') THEN
+                        senha_1 <= "0011";
+                    ELSIF senha_2 /= (senha_2'RANGE => '0') THEN
+                        senha_2 <= "0011";
+                    ELSIF senha_3 /= (senha_3'RANGE => '0') THEN
+                        senha_3 <= "0011";
+                    END IF;
+
+                WHEN "0100" => --4
+                    IF senha_0 /= (senha_0'RANGE => '0') THEN
+                        senha_0 <= "0100";
+                    ELSIF senha_1 /= (senha_1'RANGE => '0') THEN
+                        senha_1 <= "0100";
+                    ELSIF senha_2 /= (senha_2'RANGE => '0') THEN
+                        senha_2 <= "0100";
+                    ELSIF senha_3 /= (senha_3'RANGE => '0') THEN
+                        senha_3 <= "0100";
+                    END IF;
+
+                WHEN "0101" => --5
+                    IF senha_0 /= (senha_0'RANGE => '0') THEN
+                        senha_0 <= "0101";
+                    ELSIF senha_1 /= (senha_1'RANGE => '0') THEN
+                        senha_1 <= "0101";
+                    ELSIF senha_2 /= (senha_2'RANGE => '0') THEN
+                        senha_2 <= "0101";
+                    ELSIF senha_3 /= (senha_3'RANGE => '0') THEN
+                        senha_3 <= "0101";
+                    END IF;
+
+                WHEN "0110" => --6
+                    IF senha_0 /= (senha_0'RANGE => '0') THEN
+                        senha_0 <= "0110";
+                    ELSIF senha_1 /= (senha_1'RANGE => '0') THEN
+                        senha_1 <= "0110";
+                    ELSIF senha_2 /= (senha_2'RANGE => '0') THEN
+                        senha_2 <= "0110";
+                    ELSIF senha_3 /= (senha_3'RANGE => '0') THEN
+                        senha_3 <= "0110";
+                    END IF;
+
+                WHEN "0111" => --7
+                    IF senha_0 /= (senha_0'RANGE => '0') THEN
+                        senha_0 <= "0111";
+                    ELSIF senha_1 /= (senha_1'RANGE => '0') THEN
+                        senha_1 <= "0111";
+                    ELSIF senha_2 /= (senha_2'RANGE => '0') THEN
+                        senha_2 <= "0111";
+                    ELSIF senha_3 /= (senha_3'RANGE => '0') THEN
+                        senha_3 <= "0111";
+                    END IF;
+
+                WHEN "1000" => --8
+                    IF senha_0 /= (senha_0'RANGE => '0') THEN
+                        senha_0 <= "1000";
+                    ELSIF senha_1 /= (senha_1'RANGE => '0') THEN
+                        senha_1 <= "1000";
+                    ELSIF senha_2 /= (senha_2'RANGE => '0') THEN
+                        senha_2 <= "1000";
+                    ELSIF senha_3 /= (senha_3'RANGE => '0') THEN
+                        senha_3 <= "1000";
+                    END IF;
+
+                WHEN "1001" => --9
+                    IF senha_0 /= (senha_0'RANGE => '0') THEN
+                        senha_0 <= "1001";
+                    ELSIF senha_1 /= (senha_1'RANGE => '0') THEN
+                        senha_1 <= "1001";
+                    ELSIF senha_2 /= (senha_2'RANGE => '0') THEN
+                        senha_2 <= "1001";
+                    ELSIF senha_3 /= (senha_3'RANGE => '0') THEN
+                        senha_3 <= "1001";
+                    END IF;
+
+            END CASE;
+
+            IF senha_3 /= (senha_3'RANGE => '0') THEN
+                IF senha_0 = "0010" AND senha_1 = "0011" AND senha_2 = "0111" AND senha_3 = "0101" THEN
+                    senha_ok <= '1';
+                    senha_fail <= '0';
+                ELSE
+                    senha_ok <= '0';
+                    senha_fail <= '1';
+                END IF;
+            END IF;
         END IF;
     END PROCESS;
 
-END senha;
+END ARCHITECTURE;
